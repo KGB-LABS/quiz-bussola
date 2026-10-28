@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Painel do Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@700;800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{
+  --bg:#F5F7F4;--card:#FFFFFF;--ink:#1F2A24;--muted:#4D5A53;--line:#C9D3CC;
+  --accent:#2E5E3E;--accent-ink:#FFFFFF;--soft:#E6EEE8;--gold:#FBE7B5;--gold-ink:#5C3D00;--err:#B3261E;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121815;--card:#1B231F;--ink:#E7EEE9;--muted:#A9B7AF;--line:#34423A;
+    --accent:#6FBF8A;--accent-ink:#0E1A13;--soft:#22302A;--gold:#4A3A12;--gold-ink:#FBE7B5;--err:#FF8A80;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121815;--card:#1B231F;--ink:#E7EEE9;--muted:#A9B7AF;--line:#34423A;
+  --accent:#6FBF8A;--accent-ink:#0E1A13;--soft:#22302A;--gold:#4A3A12;--gold-ink:#FBE7B5;--err:#FF8A80;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Source Sans 3',system-ui,sans-serif;font-size:16px;line-height:1.5}
+main{max-width:860px;margin:0 auto;padding:24px 16px 48px;display:flex;flex-direction:column;gap:16px}
+h1{margin:0;font-family:'Bitter',Georgia,serif;font-weight:800;font-size:30px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
+label{font-weight:600;display:flex;flex-direction:column;gap:6px}
+input{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px}
+button{font:inherit;font-weight:700;min-height:44px;border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);cursor:pointer;padding:0 16px}
+button.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.check{flex-direction:row;align-items:center;gap:8px;font-weight:600}
+.check input{min-height:0;width:20px;height:20px}
+.winner{background:var(--gold);color:var(--gold-ink);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:4px}
+.winner .name{font-family:'Bitter',Georgia,serif;font-weight:800;font-size:28px}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:520px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+th{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.error{color:var(--err);font-weight:600;margin:0}
+.muted{color:var(--muted)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <h1>Painel do Desafio da Bússola</h1>
+
+  <form id="login" class="card" hidden>
+    <p class="muted" style="margin:0">Entre com a mesma conta de administrador do site.</p>
+    <label>E-mail <input id="email" type="email" autocomplete="username" required></label>
+    <label>Senha <input id="senha" type="password" autocomplete="current-password" required></label>
+    <p class="error" id="erroLogin" role="alert"></p>
+    <button type="submit">Entrar</button>
+  </form>
+
+  <section id="painel" hidden style="display:flex;flex-direction:column;gap:16px">
+    <div class="winner" id="vencedor" aria-live="polite"></div>
+    <div class="card">
+      <div class="bar">
+        <label class="check"><input type="checkbox" id="soPerfeitos" checked> Só quem acertou tudo</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" id="atualizar">Atualizar</button>
+          <button type="button" class="ghost" id="sair">Sair</button>
+        </div>
+      </div>
+      <p class="muted" id="resumo" style="margin:0"></p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Nome</th><th>Patrulha</th><th>Acertos</th><th>Enviado às</th></tr></thead>
+          <tbody id="linhas"></tbody>
+        </table>
+      </div>
+      <p class="error" id="erroPainel" role="alert"></p>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const sb = supabase.createClient('https://tjtojdbdcjtthzcqdbst.supabase.co', 'sb_publishable_pEtmRRgfT6ULyjbGLSs4aQ_Pn7flJMI');
+const $ = (id) => document.getElementById(id);
+let linhas = [];
+
+const hora = (iso) => {
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR') + ' ' +
+    d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) +
+    ',' + String(d.getMilliseconds()).padStart(3, '0');
+};
+
+function render() {
+  const so = $('soPerfeitos').checked;
+  const lista = so ? linhas.filter((l) => l.acertos === l.total) : linhas;
+  const perfeitos = linhas.filter((l) => l.acertos === l.total);
+  $('resumo').textContent = linhas.length + ' envios · ' + perfeitos.length + ' com tudo certo';
+
+  const v = $('vencedor');
+  v.replaceChildren();
+  const t = document.createElement('div');
+  t.style.fontWeight = '700';
+  if (perfeitos.length) {
+    t.textContent = '🏆 Primeiro a acertar tudo';
+    const n = document.createElement('div'); n.className = 'name'; n.textContent = perfeitos[0].nome;
+    const s = document.createElement('div');
+    s.textContent = (perfeitos[0].patrulha ? 'Patrulha ' + perfeitos[0].patrulha + ' · ' : '') + hora(perfeitos[0].enviado_em);
+    v.append(t, n, s);
+  } else {
+    t.textContent = 'Ninguém acertou as 3 ainda.';
+    v.append(t);
+  }
+
+  const tb = $('linhas');
+  tb.replaceChildren();
+  lista.forEach((l, i) => {
+    const tr = document.createElement('tr');
+    [String(i + 1), l.nome, l.patrulha || '—', l.acertos + '/' + l.total, hora(l.enviado_em)].forEach((txt, j) => {
+      const td = document.createElement('td');
+      td.textContent = txt;
+      if (j === 0 || j === 3) td.className = 'num';
+      tr.append(td);
+    });
+    tb.append(tr);
+  });
+}
+
+async function carregar() {
+  $('erroPainel').textContent = '';
+  const { data, error } = await sb.from('quiz_bussola_respostas')
+    .select('nome, patrulha, acertos, total, enviado_em')
+    .order('enviado_em', { ascending: true })
+    .limit(1000);
+  if (error) { $('erroPainel').textContent = error.message; return; }
+  linhas = data || [];
+  if (!linhas.length) $('erroPainel').textContent = '';
+  render();
+}
+
+let timer;
+async function entrar(session) {
+  $('login').hidden = !!session;
+  $('painel').hidden = !session;
+  clearInterval(timer);
+  if (session) {
+    const { data: master } = await sb.rpc('is_master');
+    const { data: admin } = await sb.rpc('is_admin');
+    if (!master && !admin) {
+      $('erroPainel').textContent = 'Esta conta não é administradora do site.';
+      return;
+    }
+    await carregar();
+    timer = setInterval(carregar, 15000);
+  }
+}
+
+$('login').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('erroLogin').textContent = '';
+  const { data, error } = await sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('senha').value });
+  if (error) { $('erroLogin').textContent = 'E-mail ou senha inválidos.'; return; }
+  entrar(data.session);
+});
+$('atualizar').addEventListener('click', carregar);
+$('soPerfeitos').addEventListener('change', render);
+$('sair').addEventListener('click', async () => { await sb.auth.signOut(); entrar(null); });
+
+sb.auth.getSession().then(({ data }) => entrar(data.session));
+</script>
+</body>
+</html>
