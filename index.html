@@ -101,9 +101,13 @@ button:disabled{opacity:.6;cursor:progress}
   </section>
 
   <section class="card" aria-labelledby="q5">
-    <div class="q-num">Pergunta 5 · Trigonometria de campo</div>
-    <p class="q-text" id="q5">Para medir a largura de um rio sem atravessar, você andou na perpendicular até o ponto em que o ângulo até o alvo na outra margem ficou em 45°. A base percorrida foi de 30 m. Qual é a largura do rio, em metros?</p>
-    <label class="unit"><input id="r5" inputmode="numeric" maxlength="40" aria-labelledby="q5"><span>m</span></label>
+    <div class="q-num">Pergunta 5 · Coordenadas</div>
+    <p class="q-text" id="q5">Em graus decimais, como no Google Maps, como são escritas as latitudes ao Sul e as longitudes a Oeste?</p>
+    <fieldset aria-labelledby="q5">
+      <label class="opt"><input type="radio" name="r5" value="positivos"> Como números positivos</label>
+      <label class="opt"><input type="radio" name="r5" value="negativos"> Como números negativos</label>
+      <label class="opt"><input type="radio" name="r5" value="letras"> Só com as letras S e W, sem sinal</label>
+    </fieldset>
   </section>
 
   <p class="error" id="erro" role="alert"></p>
@@ -144,8 +148,8 @@ function mostrarResultado(r) {
 }
 
 function tentarDeNovo() {
-  ['r1', 'r2', 'r3', 'r5'].forEach((id) => ($(id).value = ''));
-  document.querySelectorAll('input[name="r4"]').forEach((o) => (o.checked = false));
+  ['r1', 'r2', 'r3'].forEach((id) => ($(id).value = ''));
+  document.querySelectorAll('input[type="radio"]').forEach((o) => (o.checked = false));
   $('resultado').hidden = true;
   perguntas.forEach((s) => (s.hidden = false));
   form.hidden = false;
@@ -166,7 +170,7 @@ form.addEventListener('submit', async (ev) => {
     return;
   }
   const r = ['r1', 'r2', 'r3', 'r4', 'r5'].map((id) =>
-    id === 'r4' ? (document.querySelector('input[name="r4"]:checked') || {}).value || '' : $(id).value.trim());
+    $(id) ? $(id).value.trim() : (document.querySelector(`input[name="${id}"]:checked`) || {}).value || '');
   if (r.some((v) => !v)) {
     $('erro').textContent = 'Responda as 5 perguntas antes de enviar.';
     return;
