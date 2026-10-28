@@ -54,7 +54,7 @@ button:disabled{opacity:.6;cursor:progress}
   <header>
     <div class="eyebrow">Instrução de campo · Orientação</div>
     <h1>Desafio da Bússola</h1>
-    <p class="lead">3 perguntas. Quem enviar primeiro com tudo certo ganha o prêmio. Errou? Pode tentar de novo, mas vale o horário do primeiro envio com tudo certo.</p>
+    <p class="lead">5 perguntas. Quem enviar primeiro com tudo certo ganha o prêmio. Errou? Pode tentar de novo, mas vale o horário do primeiro envio com tudo certo.</p>
   </header>
 
   <form id="quiz" class="card" novalidate>
@@ -82,8 +82,20 @@ button:disabled{opacity:.6;cursor:progress}
 
   <section class="card" aria-labelledby="q3">
     <div class="q-num">Pergunta 3 · Escala</div>
-    <p class="q-text" id="q3">Numa carta 1:25.000 você mediu 7 cm entre a sede e a ponte. Qual é a distância real?</p>
+    <p class="q-text" id="q3">Numa carta 1:25.000 você mediu 7 cm entre a sede e a ponte. Qual é a distância real, em metros?</p>
     <label class="unit"><input id="r3" inputmode="numeric" maxlength="40" aria-labelledby="q3"><span>m</span></label>
+  </section>
+
+  <section class="card" aria-labelledby="q4">
+    <div class="q-num">Pergunta 4 · Curvas de nível</div>
+    <p class="q-text" id="q4">Entre dois pontos da carta há 20 m de desnível, numa distância horizontal de 200 m. Qual é a declividade, em porcentagem?</p>
+    <label class="unit"><input id="r4" inputmode="numeric" maxlength="40" aria-labelledby="q4"><span>%</span></label>
+  </section>
+
+  <section class="card" aria-labelledby="q5">
+    <div class="q-num">Pergunta 5 · Trigonometria de campo</div>
+    <p class="q-text" id="q5">Para medir a largura de um rio sem atravessar, você andou na perpendicular até o ponto em que o ângulo até o alvo na outra margem ficou em 45°. A base percorrida foi de 30 m. Qual é a largura do rio, em metros?</p>
+    <label class="unit"><input id="r5" inputmode="numeric" maxlength="40" aria-labelledby="q5"><span>m</span></label>
   </section>
 
   <p class="error" id="erro" role="alert"></p>
@@ -124,7 +136,7 @@ function mostrarResultado(r) {
 }
 
 function tentarDeNovo() {
-  ['r1', 'r2', 'r3'].forEach((id) => ($(id).value = ''));
+  ['r1', 'r2', 'r3', 'r4', 'r5'].forEach((id) => ($(id).value = ''));
   $('resultado').hidden = true;
   perguntas.forEach((s) => (s.hidden = false));
   form.hidden = false;
@@ -144,9 +156,9 @@ form.addEventListener('submit', async (ev) => {
     $('nome').focus();
     return;
   }
-  const r = ['r1', 'r2', 'r3'].map((id) => $(id).value.trim());
+  const r = ['r1', 'r2', 'r3', 'r4', 'r5'].map((id) => $(id).value.trim());
   if (r.some((v) => !v)) {
-    $('erro').textContent = 'Responda as 3 perguntas antes de enviar.';
+    $('erro').textContent = 'Responda as 5 perguntas antes de enviar.';
     return;
   }
   btn.disabled = true;
@@ -156,7 +168,7 @@ form.addEventListener('submit', async (ev) => {
     const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/quiz_bussola_enviar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY },
-      body: JSON.stringify({ _nome: nome, _patrulha: $('patrulha').value.trim(), _r1: r[0], _r2: r[1], _r3: r[2] }),
+      body: JSON.stringify({ _nome: nome, _patrulha: $('patrulha').value.trim(), _r1: r[0], _r2: r[1], _r3: r[2], _r4: r[3], _r5: r[4] }),
     });
     const body = await res.json();
     if (!res.ok) throw new Error(body && body.message ? body.message : 'Não foi possível enviar.');

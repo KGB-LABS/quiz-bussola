@@ -1,6 +1,6 @@
 # Desafio da Bússola
 
-Quiz de 3 perguntas para os escoteiros e painel dos chefes. Página estática (GitHub Pages), separada do site.
+Quiz de 5 perguntas para os escoteiros e painel dos chefes. Página estática (GitHub Pages), separada do site.
 
 - `index.html`: quiz, sem login.
 - `painel.html`: quem acertou tudo primeiro (login de admin do site).
