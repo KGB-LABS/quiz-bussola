@@ -39,6 +39,10 @@ input{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(
 input:focus{outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent);border-color:var(--accent)}
 .unit{display:flex;align-items:center;gap:8px}
 .unit span{font-weight:700;color:var(--muted);min-width:24px}
+fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.opt{flex-direction:row;align-items:center;gap:12px;min-height:48px;padding:10px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);font-weight:600;cursor:pointer}
+.opt:has(input:checked){border-color:var(--accent);background:var(--soft)}
+.opt input{width:20px;height:20px;min-height:0;margin:0;accent-color:var(--accent)}
 button{font:inherit;font-weight:700;font-size:18px;min-height:52px;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);cursor:pointer;padding:0 20px}
 button:disabled{opacity:.6;cursor:progress}
 .error{color:var(--err);font-weight:600;margin:0;min-height:1.5em}
@@ -88,8 +92,12 @@ button:disabled{opacity:.6;cursor:progress}
 
   <section class="card" aria-labelledby="q4">
     <div class="q-num">Pergunta 4 · Curvas de nível</div>
-    <p class="q-text" id="q4">Entre dois pontos da carta há 20 m de desnível, numa distância horizontal de 200 m. Qual é a declividade, em porcentagem?</p>
-    <label class="unit"><input id="r4" inputmode="numeric" maxlength="40" aria-labelledby="q4"><span>%</span></label>
+    <p class="q-text" id="q4">Na carta, as curvas de nível de uma encosta aparecem bem próximas umas das outras. Como é o terreno nesse trecho?</p>
+    <fieldset aria-labelledby="q4">
+      <label class="opt"><input type="radio" name="r4" value="ingreme"> Íngreme, com subida forte</label>
+      <label class="opt"><input type="radio" name="r4" value="suave"> Suave, com subida leve</label>
+      <label class="opt"><input type="radio" name="r4" value="plano"> Plano, sem desnível</label>
+    </fieldset>
   </section>
 
   <section class="card" aria-labelledby="q5">
@@ -136,7 +144,8 @@ function mostrarResultado(r) {
 }
 
 function tentarDeNovo() {
-  ['r1', 'r2', 'r3', 'r4', 'r5'].forEach((id) => ($(id).value = ''));
+  ['r1', 'r2', 'r3', 'r5'].forEach((id) => ($(id).value = ''));
+  document.querySelectorAll('input[name="r4"]').forEach((o) => (o.checked = false));
   $('resultado').hidden = true;
   perguntas.forEach((s) => (s.hidden = false));
   form.hidden = false;
@@ -156,7 +165,8 @@ form.addEventListener('submit', async (ev) => {
     $('nome').focus();
     return;
   }
-  const r = ['r1', 'r2', 'r3', 'r4', 'r5'].map((id) => $(id).value.trim());
+  const r = ['r1', 'r2', 'r3', 'r4', 'r5'].map((id) =>
+    id === 'r4' ? (document.querySelector('input[name="r4"]:checked') || {}).value || '' : $(id).value.trim());
   if (r.some((v) => !v)) {
     $('erro').textContent = 'Responda as 5 perguntas antes de enviar.';
     return;
