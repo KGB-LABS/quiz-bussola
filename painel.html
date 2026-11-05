@@ -43,6 +43,12 @@ th{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute
 td.num{text-align:right;font-variant-numeric:tabular-nums}
 .error{color:var(--err);font-weight:600;margin:0}
 .muted{color:var(--muted)}
+.controle{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.controle .estado{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px}
+.controle .dot{width:14px;height:14px;border-radius:50%;background:var(--err)}
+.controle.on .dot{background:var(--accent)}
+.controle small{display:block;font-weight:400;font-size:14px;color:var(--muted)}
+button.stop{background:var(--err);color:#fff}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -59,6 +65,12 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
   </form>
 
   <section id="painel" hidden style="display:flex;flex-direction:column;gap:16px">
+    <div class="card controle" id="controle">
+      <div class="estado"><span class="dot" aria-hidden="true"></span>
+        <span><span id="estadoTxt">Desafio fechado</span><small id="estadoSub">Os escoteiros veem “Aguardando o chefe liberar”.</small></span>
+      </div>
+      <button type="button" id="alternar">Liberar desafio</button>
+    </div>
     <div class="winner" id="vencedor" aria-live="polite"></div>
     <div class="card">
       <div class="bar">
@@ -128,8 +140,39 @@ function render() {
   });
 }
 
+let liberado = false;
+function pintarControle(row) {
+  liberado = !!(row && row.liberado);
+  $('controle').classList.toggle('on', liberado);
+  $('estadoTxt').textContent = liberado ? 'Desafio liberado' : 'Desafio fechado';
+  $('estadoSub').textContent = liberado
+    ? 'Aberto desde ' + (row.liberado_em ? hora(row.liberado_em) : '—') + '. Envios aceitos.'
+    : 'Os escoteiros veem “Aguardando o chefe liberar”. Envios bloqueados.';
+  const b = $('alternar');
+  b.textContent = liberado ? 'Encerrar desafio' : 'Liberar desafio';
+  b.classList.toggle('stop', liberado);
+}
+
+async function carregarEstado() {
+  const { data, error } = await sb.from('quiz_bussola_estado').select('liberado, liberado_em').eq('id', 1).maybeSingle();
+  if (error) { $('erroPainel').textContent = error.message; return; }
+  pintarControle(data);
+}
+
+$('alternar').addEventListener('click', async () => {
+  const novo = !liberado;
+  if (!novo && !confirm('Encerrar o desafio? Novos envios serão recusados.')) return;
+  const b = $('alternar');
+  b.disabled = true;
+  const { data, error } = await sb.rpc('quiz_bussola_liberar', { _liberado: novo });
+  b.disabled = false;
+  if (error) { $('erroPainel').textContent = error.message; return; }
+  pintarControle(data);
+});
+
 async function carregar() {
   $('erroPainel').textContent = '';
+  carregarEstado();
   const { data, error } = await sb.from('quiz_bussola_respostas')
     .select('nome, patrulha, acertos, total, enviado_em')
     .order('enviado_em', { ascending: true })

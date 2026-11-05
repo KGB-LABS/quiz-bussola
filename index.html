@@ -10,47 +10,65 @@
 :root{
   --bg:#F5F7F4;--card:#FFFFFF;--ink:#1F2A24;--muted:#4D5A53;--line:#C9D3CC;
   --accent:#2E5E3E;--accent-ink:#FFFFFF;--soft:#E6EEE8;--warn:#9A4A12;--warn-bg:#FDF1E6;--err:#B3261E;
+  --wait:#B7791F;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#121815;--card:#1B231F;--ink:#E7EEE9;--muted:#A9B7AF;--line:#34423A;
     --accent:#6FBF8A;--accent-ink:#0E1A13;--soft:#22302A;--warn:#F2B27A;--warn-bg:#2E2218;--err:#FF8A80;
+    --wait:#F2B27A;
   }
 }
 :root[data-theme="dark"]{
   --bg:#121815;--card:#1B231F;--ink:#E7EEE9;--muted:#A9B7AF;--line:#34423A;
   --accent:#6FBF8A;--accent-ink:#0E1A13;--soft:#22302A;--warn:#F2B27A;--warn-bg:#2E2218;--err:#FF8A80;
+  --wait:#F2B27A;
 }
 *{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:'Source Sans 3',system-ui,sans-serif;font-size:17px;line-height:1.5}
 main{max-width:640px;margin:0 auto;padding:24px 16px 48px;display:flex;flex-direction:column;gap:18px}
 header{display:flex;flex-direction:column;gap:6px;padding:8px 0}
 .eyebrow{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
 h1{margin:0;font-family:'Bitter',Georgia,serif;font-weight:800;font-size:34px;line-height:1.1;text-wrap:balance}
+h2{margin:0;font-family:'Bitter',Georgia,serif;font-weight:800;font-size:20px}
 .lead{margin:0;color:var(--muted)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
 .q-num{font-family:'Bitter',Georgia,serif;font-weight:800;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
 .q-text{margin:0;font-size:18px;font-weight:600;text-wrap:pretty}
-.hint{font-size:14px;color:var(--muted);background:var(--soft);border-radius:8px;padding:8px 10px}
 label{font-size:15px;font-weight:600;display:flex;flex-direction:column;gap:6px}
 .row{display:grid;grid-template-columns:1fr;gap:12px}
 @media (min-width:520px){.row{grid-template-columns:1.4fr 1fr}}
 input{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;min-height:48px;width:100%}
 input:focus{outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent);border-color:var(--accent)}
-.unit{display:flex;align-items:center;gap:8px}
+.unit{display:flex;flex-direction:row;align-items:center;gap:8px}
 .unit span{font-weight:700;color:var(--muted);min-width:24px}
 fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .opt{flex-direction:row;align-items:center;gap:12px;min-height:48px;padding:10px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);font-weight:600;cursor:pointer}
 .opt:has(input:checked){border-color:var(--accent);background:var(--soft)}
 .opt input{width:20px;height:20px;min-height:0;margin:0;accent-color:var(--accent)}
 button{font:inherit;font-weight:700;font-size:18px;min-height:52px;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);cursor:pointer;padding:0 20px}
-button:disabled{opacity:.6;cursor:progress}
+button:disabled{opacity:.5;cursor:not-allowed}
+button:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 55%,transparent);outline-offset:2px}
 .error{color:var(--err);font-weight:600;margin:0;min-height:1.5em}
 .result{text-align:center;align-items:center;gap:8px;padding:28px 18px}
 .result .big{font-family:'Bitter',Georgia,serif;font-weight:800;font-size:44px;line-height:1}
 .result .time{font-size:15px;color:var(--muted)}
-.note{font-size:14px;color:var(--warn);background:var(--warn-bg);border-radius:10px;padding:10px 12px}
+.note{font-size:15px;color:var(--warn);background:var(--warn-bg);border-radius:10px;padding:10px 12px;margin:0;font-weight:600}
+.small{font-size:14px}
 [hidden]{display:none!important}
+
+/* tela inicial */
+.regras{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.status{display:flex;align-items:center;gap:12px;padding:14px;border-radius:12px;background:var(--soft);font-weight:700}
+.status .dot{flex:0 0 14px;height:14px;border-radius:50%;background:var(--wait);position:relative}
+.status .dot::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid var(--wait);opacity:.6;animation:pulso 1.6s ease-out infinite}
+.status.ok .dot,.status.ok .dot::after{background:var(--accent);border-color:var(--accent)}
+.status.ok .dot::after{animation:none;opacity:0}
+.status.off .dot,.status.off .dot::after{background:var(--err);border-color:var(--err)}
+.status small{display:block;font-weight:400;color:var(--muted);font-size:14px}
+@keyframes pulso{from{transform:scale(.6);opacity:.7}to{transform:scale(1.4);opacity:0}}
+@media (prefers-reduced-motion: reduce){.status .dot::after{animation:none}}
 </style>
 </head>
 <body>
@@ -58,62 +76,78 @@ button:disabled{opacity:.6;cursor:progress}
   <header>
     <div class="eyebrow">Instrução de campo · Orientação</div>
     <h1>Desafio da Bússola</h1>
-    <p class="lead">5 perguntas. Quem enviar primeiro com tudo certo ganha o prêmio. Errou? Pode tentar de novo, mas vale o horário do primeiro envio com tudo certo.</p>
+    <p class="lead">5 perguntas sobre declinação, azimute, escala, curvas de nível e coordenadas.</p>
   </header>
 
-  <form id="quiz" class="card" novalidate>
+  <!-- ===== Tela inicial ===== -->
+  <section id="inicio" class="card" aria-labelledby="tIni">
+    <h2 id="tIni">Antes de começar</h2>
+    <ul class="regras">
+      <li>Quem enviar <strong>primeiro com tudo certo</strong> ganha o prêmio.</li>
+      <li>Errou? Pode tentar de novo. Vale o horário do primeiro envio com tudo certo.</li>
+      <li>O desafio só abre quando o chefe liberar. Deixe esta página aberta.</li>
+    </ul>
     <div class="row">
       <label>Seu nome
-        <input id="nome" name="nome" autocomplete="name" required maxlength="80">
+        <input id="nome" autocomplete="name" required maxlength="80">
       </label>
       <label>Patrulha
-        <input id="patrulha" name="patrulha" maxlength="60">
+        <input id="patrulha" maxlength="60">
       </label>
     </div>
+    <div class="status" id="status" role="status" aria-live="polite">
+      <span class="dot" aria-hidden="true"></span>
+      <span><span id="statusTxt">Verificando…</span><small id="statusSub"></small></span>
+    </div>
+    <p class="error" id="erroInicio" role="alert"></p>
+    <button type="button" id="comecar" disabled>Começar</button>
+  </section>
+
+  <!-- ===== Quiz ===== -->
+  <form id="quiz" novalidate hidden style="display:flex;flex-direction:column;gap:18px">
+    <p class="note" id="encerrado" hidden>O chefe encerrou o desafio. Novos envios não serão aceitos.</p>
+
+    <section class="card" aria-labelledby="q1">
+      <div class="q-num">Pergunta 1 · Declinação</div>
+      <p class="q-text" id="q1">Na carta, o azimute até o acampamento é 120°. A declinação do local é 23° W. Que valor você ajusta na bússola para caminhar no campo?</p>
+      <label class="unit"><input id="r1" inputmode="numeric" maxlength="40" aria-labelledby="q1"><span>°</span></label>
+    </section>
+
+    <section class="card" aria-labelledby="q2">
+      <div class="q-num">Pergunta 2 · Azimute reverso</div>
+      <p class="q-text" id="q2">Você caminhou no azimute 310° até a cachoeira. Qual azimute leva você de volta ao ponto de partida?</p>
+      <label class="unit"><input id="r2" inputmode="numeric" maxlength="40" aria-labelledby="q2"><span>°</span></label>
+    </section>
+
+    <section class="card" aria-labelledby="q3">
+      <div class="q-num">Pergunta 3 · Escala</div>
+      <p class="q-text" id="q3">Numa carta 1:25.000 você mediu 7 cm entre a sede e a ponte. Qual é a distância real, em metros?</p>
+      <label class="unit"><input id="r3" inputmode="numeric" maxlength="40" aria-labelledby="q3"><span>m</span></label>
+    </section>
+
+    <section class="card" aria-labelledby="q4">
+      <div class="q-num">Pergunta 4 · Curvas de nível</div>
+      <p class="q-text" id="q4">Na carta, as curvas de nível de uma encosta aparecem bem próximas umas das outras. Como é o terreno nesse trecho?</p>
+      <fieldset aria-labelledby="q4">
+        <label class="opt"><input type="radio" name="r4" value="ingreme"> Íngreme, com subida forte</label>
+        <label class="opt"><input type="radio" name="r4" value="suave"> Suave, com subida leve</label>
+        <label class="opt"><input type="radio" name="r4" value="plano"> Plano, sem desnível</label>
+      </fieldset>
+    </section>
+
+    <section class="card" aria-labelledby="q5">
+      <div class="q-num">Pergunta 5 · Coordenadas</div>
+      <p class="q-text" id="q5">Em graus decimais, como no Google Maps, como são escritas as latitudes ao Sul e as longitudes a Oeste?</p>
+      <fieldset aria-labelledby="q5">
+        <label class="opt"><input type="radio" name="r5" value="positivos"> Como números positivos</label>
+        <label class="opt"><input type="radio" name="r5" value="negativos"> Como números negativos</label>
+        <label class="opt"><input type="radio" name="r5" value="letras"> Só com as letras S e W, sem sinal</label>
+      </fieldset>
+    </section>
+
+    <p class="error" id="erro" role="alert"></p>
+    <button type="submit" id="enviar">Enviar respostas</button>
   </form>
-
-  <section class="card" aria-labelledby="q1">
-    <div class="q-num">Pergunta 1 · Declinação</div>
-    <p class="q-text" id="q1">Na carta, o azimute até o acampamento é 120°. A declinação do local é 23° W. Que valor você ajusta na bússola para caminhar no campo?</p>
-    <label class="unit"><input id="r1" inputmode="numeric" maxlength="40" aria-labelledby="q1"><span>°</span></label>
-  </section>
-
-  <section class="card" aria-labelledby="q2">
-    <div class="q-num">Pergunta 2 · Azimute reverso</div>
-    <p class="q-text" id="q2">Você caminhou no azimute 310° até a cachoeira. Qual azimute leva você de volta ao ponto de partida?</p>
-    <label class="unit"><input id="r2" inputmode="numeric" maxlength="40" aria-labelledby="q2"><span>°</span></label>
-  </section>
-
-  <section class="card" aria-labelledby="q3">
-    <div class="q-num">Pergunta 3 · Escala</div>
-    <p class="q-text" id="q3">Numa carta 1:25.000 você mediu 7 cm entre a sede e a ponte. Qual é a distância real, em metros?</p>
-    <label class="unit"><input id="r3" inputmode="numeric" maxlength="40" aria-labelledby="q3"><span>m</span></label>
-  </section>
-
-  <section class="card" aria-labelledby="q4">
-    <div class="q-num">Pergunta 4 · Curvas de nível</div>
-    <p class="q-text" id="q4">Na carta, as curvas de nível de uma encosta aparecem bem próximas umas das outras. Como é o terreno nesse trecho?</p>
-    <fieldset aria-labelledby="q4">
-      <label class="opt"><input type="radio" name="r4" value="ingreme"> Íngreme, com subida forte</label>
-      <label class="opt"><input type="radio" name="r4" value="suave"> Suave, com subida leve</label>
-      <label class="opt"><input type="radio" name="r4" value="plano"> Plano, sem desnível</label>
-    </fieldset>
-  </section>
-
-  <section class="card" aria-labelledby="q5">
-    <div class="q-num">Pergunta 5 · Coordenadas</div>
-    <p class="q-text" id="q5">Em graus decimais, como no Google Maps, como são escritas as latitudes ao Sul e as longitudes a Oeste?</p>
-    <fieldset aria-labelledby="q5">
-      <label class="opt"><input type="radio" name="r5" value="positivos"> Como números positivos</label>
-      <label class="opt"><input type="radio" name="r5" value="negativos"> Como números negativos</label>
-      <label class="opt"><input type="radio" name="r5" value="letras"> Só com as letras S e W, sem sinal</label>
-    </fieldset>
-  </section>
-
-  <p class="error" id="erro" role="alert"></p>
-  <button type="submit" form="quiz" id="enviar">Enviar respostas</button>
-
-  <p class="lead" style="font-size:14px">Seu nome e sua patrulha servem só para conferir o resultado do desafio. Só os chefes veem as respostas, e elas são apagadas depois da atividade.</p>
 
   <section class="card result" id="resultado" hidden aria-live="polite">
     <div class="eyebrow">Resposta registrada</div>
@@ -122,21 +156,90 @@ button:disabled{opacity:.6;cursor:progress}
     <div class="time" id="hora"></div>
     <button type="button" id="denovo" style="margin-top:8px">Tentar de novo</button>
   </section>
+
+  <p class="lead small">Seu nome e sua patrulha servem só para conferir o resultado do desafio. Só os chefes veem as respostas, e elas são apagadas depois da atividade.</p>
 </main>
 
 <script>
 const SUPABASE_URL = 'https://tjtojdbdcjtthzcqdbst.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_pEtmRRgfT6ULyjbGLSs4aQ_Pn7flJMI';
+const HEADERS = { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY };
 
 const $ = (id) => document.getElementById(id);
 const form = $('quiz');
 const btn = $('enviar');
-const perguntas = document.querySelectorAll('section.card:not(.result)');
+const btnComecar = $('comecar');
 
+let liberado = false;
+let etapa = 'inicio';          // inicio | quiz | resultado
+let timer = null;
+
+/* ---------- liberação (consulta ao Supabase) ---------- */
+function pintarStatus(estado) {
+  const box = $('status');
+  box.classList.remove('ok', 'off');
+  if (estado === 'ok') {
+    box.classList.add('ok');
+    $('statusTxt').textContent = 'Desafio liberado!';
+    $('statusSub').textContent = 'Preencha seu nome e toque em Começar.';
+  } else if (estado === 'off') {
+    box.classList.add('off');
+    $('statusTxt').textContent = 'Sem conexão';
+    $('statusSub').textContent = 'Tentando de novo em instantes…';
+  } else {
+    $('statusTxt').textContent = 'Aguardando o chefe liberar';
+    $('statusSub').textContent = 'O botão Começar acende sozinho quando for a hora.';
+  }
+}
+
+async function verificar() {
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/quiz_bussola_estado?id=eq.1&select=liberado', { headers: HEADERS, cache: 'no-store' });
+    if (!res.ok) throw new Error();
+    const [row] = await res.json();
+    liberado = !!(row && row.liberado);
+    pintarStatus(liberado ? 'ok' : 'espera');
+  } catch {
+    liberado = false;
+    pintarStatus('off');
+  }
+  btnComecar.disabled = !liberado;
+  $('encerrado').hidden = liberado || etapa !== 'quiz';
+  btn.disabled = !liberado && etapa === 'quiz';
+  agendar();
+}
+
+function agendar() {
+  clearTimeout(timer);
+  timer = setTimeout(verificar, etapa === 'inicio' ? 3000 : 10000);
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) verificar(); });
+
+/* ---------- navegação entre telas ---------- */
+function irPara(nova) {
+  etapa = nova;
+  $('inicio').hidden = nova !== 'inicio';
+  form.hidden = nova !== 'quiz';
+  $('resultado').hidden = nova !== 'resultado';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+btnComecar.addEventListener('click', () => {
+  if ($('nome').value.trim().length < 2) {
+    $('erroInicio').textContent = 'Escreva seu nome antes de começar.';
+    $('nome').focus();
+    return;
+  }
+  if (!liberado) return;
+  $('erroInicio').textContent = '';
+  irPara('quiz');
+  $('r1').focus({ preventScroll: true });
+  verificar();
+});
+$('nome').addEventListener('input', () => { $('erroInicio').textContent = ''; });
+
+/* ---------- resultado ---------- */
 function mostrarResultado(r) {
-  perguntas.forEach((s) => (s.hidden = true));
-  form.hidden = true;
-  btn.hidden = true;
   $('erro').textContent = '';
   $('placar').textContent = r.acertos + ' de ' + r.total;
   $('msg').textContent = r.acertos === r.total
@@ -144,31 +247,22 @@ function mostrarResultado(r) {
     : 'Ainda não foi dessa vez. Reveja a instrução e tente de novo!';
   const d = new Date(r.enviado_em);
   $('hora').textContent = 'Enviado às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  $('resultado').hidden = false;
+  irPara('resultado');
 }
 
-function tentarDeNovo() {
+$('denovo').addEventListener('click', () => {
   ['r1', 'r2', 'r3'].forEach((id) => ($(id).value = ''));
   document.querySelectorAll('input[type="radio"]').forEach((o) => (o.checked = false));
-  $('resultado').hidden = true;
-  perguntas.forEach((s) => (s.hidden = false));
-  form.hidden = false;
-  btn.hidden = false;
-  btn.disabled = false;
   btn.textContent = 'Enviar respostas';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  irPara('quiz');
+  verificar();
   $('r1').focus({ preventScroll: true });
-}
-$('denovo').addEventListener('click', tentarDeNovo);
+});
 
+/* ---------- envio ---------- */
 form.addEventListener('submit', async (ev) => {
   ev.preventDefault();
   const nome = $('nome').value.trim();
-  if (nome.length < 2) {
-    $('erro').textContent = 'Escreva seu nome antes de enviar.';
-    $('nome').focus();
-    return;
-  }
   const r = ['r1', 'r2', 'r3', 'r4', 'r5'].map((id) =>
     $(id) ? $(id).value.trim() : (document.querySelector(`input[name="${id}"]:checked`) || {}).value || '');
   if (r.some((v) => !v)) {
@@ -181,7 +275,7 @@ form.addEventListener('submit', async (ev) => {
   try {
     const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/quiz_bussola_enviar', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY },
+      headers: { 'Content-Type': 'application/json', ...HEADERS },
       body: JSON.stringify({ _nome: nome, _patrulha: $('patrulha').value.trim(), _r1: r[0], _r2: r[1], _r3: r[2], _r4: r[3], _r5: r[4] }),
     });
     const body = await res.json();
@@ -193,6 +287,8 @@ form.addEventListener('submit', async (ev) => {
     btn.textContent = 'Enviar respostas';
   }
 });
+
+verificar();
 </script>
 </body>
 </html>
